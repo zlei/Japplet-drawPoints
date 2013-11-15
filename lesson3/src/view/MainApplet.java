@@ -33,6 +33,7 @@ public class MainApplet extends JApplet {
 	private JButton btn_load_data;
 	private JButton btn_save_data;
 	private JButton btn_delete_data;
+	private JButton btn_edit_data;
 	private JLabel label_x;
 	private JTextField text_xValue;
 	private JLabel label_y;
@@ -40,12 +41,20 @@ public class MainApplet extends JApplet {
 	private JButton btn_add_data;
 	private JRadioButton rdbtn_CartesianPlot;
 	private JRadioButton rdbtn_ColumnPlot;
+	private JCheckBox chckbx_trend_line;
+	private JCheckBox chckbx_grid;
+	private JCheckBox chckbx_xAxis;
+	private JCheckBox chckbx_yAxis;
+	
 	private String selectedRow;
-	private JButton btn_edit_data;
+	private static int basic_plot = 0;
+	private static int cartesian_plot = 1;
+	private static int column_plot = 2;
 
 	public MainApplet() {
 
-		panel = new MyBasicPanel();
+		// panel = new MyBasicPanel(cartesian_plot);
+		panel = new MyBasicPanel(basic_plot);
 
 		scrollPane = new JScrollPane();
 
@@ -108,7 +117,10 @@ public class MainApplet extends JApplet {
 			public void actionPerformed(ActionEvent e) {
 				rdbtn_CartesianPlot.setSelected(true);
 				rdbtn_ColumnPlot.setSelected(false);
-				panel = new CartesianPanel();
+				if (rdbtn_CartesianPlot.isSelected()) {
+					panel.setType(cartesian_plot);
+					panel.repaint();
+				}
 			}
 		});
 		rdbtn_ColumnPlot = new JRadioButton("Column Plot");
@@ -116,17 +128,43 @@ public class MainApplet extends JApplet {
 			public void actionPerformed(ActionEvent e) {
 				rdbtn_ColumnPlot.setSelected(true);
 				rdbtn_CartesianPlot.setSelected(false);
-				panel = new ColumnPanel();
+				if (rdbtn_ColumnPlot.isSelected()) {
+					panel.setType(column_plot);
+					panel.repaint();
+				}
 			}
 		});
 
-		JCheckBox chckbx_trend_line = new JCheckBox("Show Trend Line");
+		chckbx_trend_line = new JCheckBox("Show Trend Line");
+		chckbx_trend_line.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+			}
+		});
 
-		JCheckBox chckbx_grid = new JCheckBox("Show Grid");
+		chckbx_grid = new JCheckBox("Show Grid");
+		chckbx_grid.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				panel.changeGrid();
+				panel.repaint();
+			}
+		});
 
-		JCheckBox chckbx_x_axes = new JCheckBox("Show X Axes");
+		chckbx_xAxis = new JCheckBox("Show X Axis");
+		chckbx_xAxis.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				panel.changeAxis();
+				panel.repaint();
+			}
+		});
 
-		JCheckBox chckbx_y_axes = new JCheckBox("Show Y Axes");
+		chckbx_yAxis = new JCheckBox("Show Y Axis");
+		chckbx_yAxis.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				panel.changeAxis();
+				panel.repaint();
+			}
+		});
 
 		GroupLayout groupLayout = new GroupLayout(getContentPane());
 		groupLayout
@@ -158,56 +196,27 @@ public class MainApplet extends JApplet {
 																						.addGroup(
 																								groupLayout
 																										.createSequentialGroup()
-																										.addGroup(
-																												groupLayout
-																														.createParallelGroup(
-																																Alignment.LEADING)
-																														.addGroup(
-																																groupLayout
-																																		.createSequentialGroup()
-																																		.addGap(134)
-																																		.addComponent(
-																																				rdbtn_CartesianPlot))
-																														.addGroup(
-																																groupLayout
-																																		.createSequentialGroup()
-																																		.addGap(6)
-																																		.addComponent(
-																																				btn_edit_data,
-																																				GroupLayout.PREFERRED_SIZE,
-																																				158,
-																																				GroupLayout.PREFERRED_SIZE)
-																																		.addPreferredGap(
-																																				ComponentPlacement.RELATED)
-																																		.addComponent(
-																																				btn_delete_data,
-																																				GroupLayout.PREFERRED_SIZE,
-																																				158,
-																																				GroupLayout.PREFERRED_SIZE)))
+																										.addGap(6)
+																										.addComponent(
+																												btn_edit_data,
+																												GroupLayout.PREFERRED_SIZE,
+																												158,
+																												GroupLayout.PREFERRED_SIZE)
+																										.addPreferredGap(
+																												ComponentPlacement.RELATED)
+																										.addComponent(
+																												btn_delete_data,
+																												GroupLayout.PREFERRED_SIZE,
+																												158,
+																												GroupLayout.PREFERRED_SIZE)
 																										.addPreferredGap(
 																												ComponentPlacement.RELATED)
 																										.addComponent(
 																												btn_load_data)
-																										.addGroup(
-																												groupLayout
-																														.createParallelGroup(
-																																Alignment.LEADING)
-																														.addGroup(
-																																groupLayout
-																																		.createSequentialGroup()
-																																		.addGap(32)
-																																		.addComponent(
-																																				rdbtn_ColumnPlot,
-																																				GroupLayout.PREFERRED_SIZE,
-																																				119,
-																																				GroupLayout.PREFERRED_SIZE))
-																														.addGroup(
-																																groupLayout
-																																		.createSequentialGroup()
-																																		.addPreferredGap(
-																																				ComponentPlacement.RELATED)
-																																		.addComponent(
-																																				btn_save_data))))
+																										.addPreferredGap(
+																												ComponentPlacement.RELATED)
+																										.addComponent(
+																												btn_save_data))
 																						.addGroup(
 																								groupLayout
 																										.createSequentialGroup()
@@ -224,16 +233,28 @@ public class MainApplet extends JApplet {
 																										.addPreferredGap(
 																												ComponentPlacement.RELATED)
 																										.addComponent(
-																												chckbx_x_axes,
+																												chckbx_xAxis,
 																												GroupLayout.PREFERRED_SIZE,
 																												112,
 																												GroupLayout.PREFERRED_SIZE)
 																										.addPreferredGap(
 																												ComponentPlacement.RELATED)
 																										.addComponent(
-																												chckbx_y_axes,
+																												chckbx_yAxis,
 																												GroupLayout.PREFERRED_SIZE,
 																												135,
+																												GroupLayout.PREFERRED_SIZE))
+																						.addGroup(
+																								groupLayout
+																										.createSequentialGroup()
+																										.addGap(101)
+																										.addComponent(
+																												rdbtn_CartesianPlot)
+																										.addGap(76)
+																										.addComponent(
+																												rdbtn_ColumnPlot,
+																												GroupLayout.PREFERRED_SIZE,
+																												119,
 																												GroupLayout.PREFERRED_SIZE))))
 														.addGroup(
 																groupLayout
@@ -299,28 +320,28 @@ public class MainApplet extends JApplet {
 														.addComponent(
 																panel,
 																GroupLayout.DEFAULT_SIZE,
-																354,
+																152,
 																Short.MAX_VALUE)
 														.addComponent(
 																scrollPane,
 																GroupLayout.DEFAULT_SIZE,
-																354,
+																152,
 																Short.MAX_VALUE))
 										.addGap(12)
 										.addGroup(
 												groupLayout
 														.createParallelGroup(
 																Alignment.BASELINE)
-														.addComponent(
-																rdbtn_CartesianPlot)
-														.addComponent(
-																rdbtn_ColumnPlot)
 														.addComponent(label_x)
 														.addComponent(
 																text_xValue,
 																GroupLayout.PREFERRED_SIZE,
 																GroupLayout.DEFAULT_SIZE,
-																GroupLayout.PREFERRED_SIZE))
+																GroupLayout.PREFERRED_SIZE)
+														.addComponent(
+																rdbtn_CartesianPlot)
+														.addComponent(
+																rdbtn_ColumnPlot))
 										.addPreferredGap(
 												ComponentPlacement.UNRELATED)
 										.addGroup(
@@ -339,9 +360,9 @@ public class MainApplet extends JApplet {
 																						.addComponent(
 																								chckbx_grid)
 																						.addComponent(
-																								chckbx_x_axes)
+																								chckbx_xAxis)
 																						.addComponent(
-																								chckbx_y_axes))
+																								chckbx_yAxis))
 																		.addPreferredGap(
 																				ComponentPlacement.RELATED)
 																		.addGroup(
