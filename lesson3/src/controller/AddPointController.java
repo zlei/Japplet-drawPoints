@@ -12,6 +12,12 @@ public class AddPointController {
 		this.model = model;
 	}
 
+	/**
+	 * Get point from user, add to JLists
+	 * 
+	 * @param mainApplet
+	 * @return
+	 */
 	public boolean addPoint(MainApplet mainApplet) {
 		String pointXValue = mainApplet.getXValue().getText();
 		String pointYValue = mainApplet.getYValue().getText();
@@ -25,10 +31,11 @@ public class AddPointController {
 
 		model.getPointFromInput(pointXValue, pointYValue);
 
-				DefaultListModel list = (DefaultListModel) mainApplet.getDataList()
+		DefaultListModel list = (DefaultListModel) mainApplet.getDataList()
 				.getModel();
 		int idx = list.getSize();
 		list.add(idx, model.printPoint());
+		model.addPoint(model.printPoint());
 		return true;
 	}
 }

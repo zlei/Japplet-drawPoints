@@ -13,6 +13,12 @@ public class EditPointController {
 		this.model = model;
 	}
 
+	/**
+	 * Get data from List, allow user to update data
+	 * 
+	 * @param mainApplet
+	 * @return
+	 */
 	public boolean setEditable(MainApplet mainApplet) {
 		String selectedRow = mainApplet.getSelectedRow();
 		idx = mainApplet.getDataList().getSelectedIndex();
@@ -27,6 +33,12 @@ public class EditPointController {
 		return true;
 	}
 
+	/**
+	 * Get data from user input to update data
+	 * 
+	 * @param mainApplet
+	 * @return
+	 */
 	public boolean updatePoint(MainApplet mainApplet) {
 		String pointXValue = mainApplet.getXValue().getText();
 		String pointYValue = mainApplet.getYValue().getText();
@@ -41,6 +53,9 @@ public class EditPointController {
 		DefaultListModel list = (DefaultListModel) mainApplet.getDataList()
 				.getModel();
 		list.set(idx, model.printPoint());
+
+		model.updatePoint(idx, model.printPoint());
+
 		return true;
 	}
 }

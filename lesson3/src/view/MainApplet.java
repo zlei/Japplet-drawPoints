@@ -43,9 +43,8 @@ public class MainApplet extends JApplet {
 	private JRadioButton rdbtn_ColumnPlot;
 	private JCheckBox chckbx_trend_line;
 	private JCheckBox chckbx_grid;
-	private JCheckBox chckbx_xAxis;
-	private JCheckBox chckbx_yAxis;
-	
+	private JCheckBox chckbx_Axis;
+
 	private String selectedRow;
 	private static int basic_plot = 0;
 	private static int cartesian_plot = 1;
@@ -53,12 +52,11 @@ public class MainApplet extends JApplet {
 
 	public MainApplet() {
 
+		model = new Model();
 		// panel = new MyBasicPanel(cartesian_plot);
-		panel = new MyBasicPanel(basic_plot);
+		panel = new MyBasicPanel(MainApplet.this.model, basic_plot);
 
 		scrollPane = new JScrollPane();
-
-		model = new Model();
 
 		btn_load_data = new JButton("Load Data");
 		btn_load_data.addActionListener(new ActionListener() {
@@ -83,6 +81,7 @@ public class MainApplet extends JApplet {
 			public void actionPerformed(ActionEvent e) {
 				new RemoveSelectedController(MainApplet.this.model)
 						.removePoint(MainApplet.this);
+				panel.repaint();
 			}
 		});
 
@@ -91,6 +90,7 @@ public class MainApplet extends JApplet {
 			public void actionPerformed(ActionEvent e) {
 				new AddPointController(MainApplet.this.model)
 						.addPoint(MainApplet.this);
+				panel.repaint();
 			}
 		});
 
@@ -99,6 +99,7 @@ public class MainApplet extends JApplet {
 			public void actionPerformed(ActionEvent e) {
 				new EditPointController(MainApplet.this.model)
 						.updatePoint(MainApplet.this);
+				panel.repaint();
 			}
 		});
 
@@ -138,7 +139,8 @@ public class MainApplet extends JApplet {
 		chckbx_trend_line = new JCheckBox("Show Trend Line");
 		chckbx_trend_line.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+				panel.changeTrendline();
+				panel.repaint();
 			}
 		});
 
@@ -150,16 +152,8 @@ public class MainApplet extends JApplet {
 			}
 		});
 
-		chckbx_xAxis = new JCheckBox("Show X Axis");
-		chckbx_xAxis.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				panel.changeAxis();
-				panel.repaint();
-			}
-		});
-
-		chckbx_yAxis = new JCheckBox("Show Y Axis");
-		chckbx_yAxis.addActionListener(new ActionListener() {
+		chckbx_Axis = new JCheckBox("Show Axis");
+		chckbx_Axis.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				panel.changeAxis();
 				panel.repaint();
@@ -233,16 +227,9 @@ public class MainApplet extends JApplet {
 																										.addPreferredGap(
 																												ComponentPlacement.RELATED)
 																										.addComponent(
-																												chckbx_xAxis,
+																												chckbx_Axis,
 																												GroupLayout.PREFERRED_SIZE,
 																												112,
-																												GroupLayout.PREFERRED_SIZE)
-																										.addPreferredGap(
-																												ComponentPlacement.RELATED)
-																										.addComponent(
-																												chckbx_yAxis,
-																												GroupLayout.PREFERRED_SIZE,
-																												135,
 																												GroupLayout.PREFERRED_SIZE))
 																						.addGroup(
 																								groupLayout
@@ -302,9 +289,10 @@ public class MainApplet extends JApplet {
 																		.addGap(18)
 																		.addComponent(
 																				panel,
-																				GroupLayout.PREFERRED_SIZE,
+																				GroupLayout.DEFAULT_SIZE,
 																				517,
-																				GroupLayout.PREFERRED_SIZE)))
+																				Short.MAX_VALUE)
+																		.addGap(39)))
 										.addGap(209)));
 		groupLayout
 				.setVerticalGroup(groupLayout
@@ -320,12 +308,12 @@ public class MainApplet extends JApplet {
 														.addComponent(
 																panel,
 																GroupLayout.DEFAULT_SIZE,
-																152,
+																230,
 																Short.MAX_VALUE)
 														.addComponent(
 																scrollPane,
 																GroupLayout.DEFAULT_SIZE,
-																152,
+																230,
 																Short.MAX_VALUE))
 										.addGap(12)
 										.addGroup(
@@ -360,9 +348,7 @@ public class MainApplet extends JApplet {
 																						.addComponent(
 																								chckbx_grid)
 																						.addComponent(
-																								chckbx_xAxis)
-																						.addComponent(
-																								chckbx_yAxis))
+																								chckbx_Axis))
 																		.addPreferredGap(
 																				ComponentPlacement.RELATED)
 																		.addGroup(
@@ -397,6 +383,9 @@ public class MainApplet extends JApplet {
 
 	}
 
+	/**
+	 * update JList
+	 */
 	public void refreshList() {
 		DefaultListModel defListModel = new DefaultListModel();
 		for (String testdata : model.getDataset()) {
@@ -423,7 +412,6 @@ public class MainApplet extends JApplet {
 		});
 	}
 
-	// used for controller
 	public JList getDataList() {
 		return list_data;
 	}

@@ -1,11 +1,8 @@
 package view;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Insets;
-import java.util.Random;
 
 import javax.swing.JPanel;
 
@@ -40,7 +37,10 @@ public class MyBasicPanel extends JPanel {
 
 	private boolean setaxis = false;
 
-	public MyBasicPanel(int type) {
+	private boolean setTrendline = false;
+
+	public MyBasicPanel(Model model, int type) {
+		this.model = model;
 		this.type = type;
 	}
 
@@ -54,10 +54,11 @@ public class MyBasicPanel extends JPanel {
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		Graphics2D g2D = (Graphics2D) g;
+		// width = this.getSize().width;
+		// height = this.getSize().height;
 
-		width = this.getSize().width;
-		height = this.getSize().height;
-
+		width = 500;
+		height = 500;
 		// Hard coding the major subdivisions on each axis.
 		setScale(10, 10);
 
@@ -66,7 +67,12 @@ public class MyBasicPanel extends JPanel {
 			setBackGrid(g2D);
 		}
 		if (setaxis) {
+			g2D.scale(1, -1);
 			setAxis(g2D);
+			g2D.scale(1, -1);
+		}
+		if (setTrendline && type == 1) {
+			drawTrendLine(g2D);
 		}
 
 		switch (type) {
@@ -81,16 +87,31 @@ public class MyBasicPanel extends JPanel {
 		}
 	}
 
+	/**
+	 * To determine which type is chosen
+	 * 
+	 * @param type
+	 */
 	public void setType(int type) {
 		this.type = type;
 	}
 
+	/**
+	 * Show background grid or not
+	 */
 	public void changeGrid() {
 		setgrid = !setgrid;
 	}
 
+	/**
+	 * Show axis or not
+	 */
 	public void changeAxis() {
 		setaxis = !setaxis;
+	}
+
+	public void changeTrendline() {
+		setTrendline = !setTrendline;
 	}
 
 	/**
@@ -116,125 +137,168 @@ public class MyBasicPanel extends JPanel {
 	 * 
 	 */
 	private void setCoordSystem(Graphics2D g2D) {
+		// draw coordsystem for column
+		if (this.type == 2) {
+			g2D.translate(maxX, maxY);
+			g2D.drawString("x", maxX - 10, 10);
+			g2D.drawString("y", -maxX + 10, -maxY + 10);
+			g2D.drawString("0", -maxX + 10, 10);
 
-		g2D.drawString("x", 2 * maxX - 10, maxY - 5);
-		g2D.drawString("y", maxX + 5, +10);
+			g2D.scale(1, -1);
+			g2D.drawLine(-width / 2, 0, width / 2, 0);
+			g2D.drawLine(-width / 2, -height / 2, -width / 2, height / 2);
 
-		g2D.translate(maxX, maxY);
-		g2D.scale(1.0, -1.0);
-		g2D.drawLine(-maxX, 0, maxX, 0);
-		g2D.drawLine(0, maxY, 0, -maxY);
-
-		// mark the x-axis
-		int count = -maxX;
-		while (count < maxX) {
-			g2D.drawLine(count, -5, count, 5);
-			// g2D.drawLine(-count, -5, -count, 5);
-			count = count + tickX;
 		}
 
-		// mark the y-axis
-		count = -maxY;
-		while (count < maxY) {
-			g2D.drawLine(-5, count, 5, count);
-			// g2D.drawLine(-5, -count, 5, -count);
-			count = count + tickY;
+		// default and cartisan system
+		else {
+			g2D.translate(maxX, maxY);
+
+			g2D.drawString("x", maxX - 10, 10);
+			g2D.drawString("y", -10, -maxY + 10);
+			g2D.drawString("0", -10, 10);
+
+			g2D.scale(1.0, -1.0);
+			g2D.drawLine(-width / 2, 0, width / 2, 0);
+			g2D.drawLine(0, -height / 2, 0, height / 2);
+
 		}
 	}
 
+	/**
+	 * Helper method to set Background grid
+	 * 
+	 * @param g2D
+	 */
 	private void setBackGrid(Graphics2D g2D) {
 
-		g2D.setColor(Color.WHITE);
-		g2D.translate(maxX, maxY);
-		g2D.scale(1.0, -1.0);
-
-		// mark the x-axis
-		int count = -2 * maxX;
-		while (count < 2 * maxX) {
-			g2D.drawLine(count, -2 * maxY, count, 2 * maxY);
-			// g2D.drawLine(-count, -maxY, -count, maxY);
-			count = count + tickX;
-		}
-
-		// mark the y-axis
-		count = -2 * maxY;
-		while (count < 2 * maxY) {
-			g2D.drawLine(-2 * maxX, count, 2 * maxX, count);
+		g2D.setColor(Color.GRAY);
+		int count = -maxX;
+		/*
+		 * // mark the x-axis // to run one more time on max while (count < maxX
+		 * + 1) { g2D.drawLine(count, -maxY, count, maxY); count = count +
+		 * tickX; }
+		 */
+		// mark the y-axis, only show horizontal lines
+		count = -maxY;
+		while (count < maxY + 1) {
+			g2D.drawLine(-maxX, count, maxX, count);
 			// g2D.drawLine(-maxX, -count, maxX, -count);
 			count = count + tickY;
 		}
 	}
 
-	private void setAxis(Graphics2D g2D) {
-		g2D.setColor(Color.BLACK);
-		g2D.translate(maxX, maxY);
-		g2D.scale(1.0, -1.0);
-		g2D.drawString("x", 2 * maxX - 10, maxY - 5);
-		g2D.drawString("y", maxX + 5, +10);
-
-		// mark the x-axis
-		int count = -2 * maxX;
-		String value = Integer.toString(count);
-		while (count < 2 * maxX) {
-			g2D.drawString(value, count, maxY - 5);
-			// g2D.drawLine(-count, -5, -count, 5);
-			count = count + tickX;
-		}
-
-		// mark the y-axis
-		count = -2 * maxY;
-		while (count < 2 * maxY) {
-			g2D.drawString(value, maxX - 5, count);
-			// g2D.drawLine(-5, -count, 5, -count);
-			count = count + tickY;
-		}
-	}
-
 	/**
-	 * Helper method which specifies the function to be drawn. The function is
-	 * "hardcoded" to be the cosine funtion.
-	 * 
-	 * @param x
-	 *            the unadjusted value passed to the cosine function.
-	 * 
-	 */
-	private double f(double x) {
-		x = x / tickX;
-		return Math.cos(x);
-	}
-
-	/**
-	 * Helper method which graphs the function.
+	 * Helper method to set Axis
 	 * 
 	 * @param g2D
-	 *            the graphics context used.
-	 * 
 	 */
+	private void setAxis(Graphics2D g2D) {
+		g2D.setColor(Color.BLACK);
 
-	private void graphCartesian(Graphics2D g2D) {
-		g2D.translate(maxX, maxY);
-		g2D.setColor(Color.RED);
-		g2D.drawLine(-maxX, 5, maxX, 5);
-		// g2D.fillRect((int) model.getCurrentPointX(),
-		// (int) model.getCurrentPointY(), 2, 2);
+		// Draw column axis
+		if (this.type == 2) {
+			int count = 1;
+			String value;
+			while (count < model.getDataset().size() + 1) {
+				value = Integer.toString(count);
+				g2D.drawString(value, -maxX + count * tickX, 5);
+				count++;
+			}
 
+			// mark the y-axis
+			count = -maxY;
+			while (count < maxY + 1) {
+				if (count != 0) {
+					value = Integer.toString(-count);
+					g2D.drawString(value, -maxX + 5, count);
+					g2D.drawLine(-maxX - 5, -count, -maxX + 5, -count);
+				}
+				count = count + tickY;
+			}
+		}
+		// Draw Cartesian for default or cartesian coordinate
+		// mark the x-axis
+		else {
+			int count = -maxX;
+			String value;
+			while (count < maxX + 1) {
+				if (count != 0) {
+					value = Integer.toString(count);
+					g2D.drawString(value, count - 5, 15);
+					g2D.drawLine(-count, -5, -count, 5);
+				}
+				count = count + tickX;
+			}
+
+			// mark the y-axis
+			count = -maxY;
+			while (count < maxY + 1) {
+				if (count != 0) {
+					value = Integer.toString(count);
+					g2D.drawString(value, -40, count + 5);
+					g2D.scale(1, -1);
+					g2D.drawLine(-5, count, 5, count);
+					g2D.scale(1, -1);
+				}
+				count = count + tickY;
+			}
+		}
 	}
 
-	private void graphColumn(Graphics2D g2D) {
-		int y2, x2;
-		int pixel = -maxX;
-		double x = (double) pixel;
-		double y = f(x);
-		int y1 = (int) (y * tickY);
-		int x1 = pixel;
-		for (pixel = -maxX; pixel < maxX; pixel++) {
-			x = (double) pixel;
-			y = f(x);
-			y2 = (int) (y * tickY);
-			x2 = pixel;
-			g2D.drawLine(x1, y1, x2, y2);
-			x1 = x2;
-			y1 = y2;
+	/**
+	 * To draw Cartesian plot
+	 * 
+	 * @param g2D
+	 */
+	private void graphCartesian(Graphics2D g2D) {
+		g2D.setColor(Color.RED);
+		model.loadPoints();
+		for (Model.Point point : model.loadPointList()) {
+			g2D.fillRect((int) point.xValue, (int) point.yValue, 4, 4);
 		}
+	}
+
+	/**
+	 * To draw column plot
+	 * 
+	 * @param g2D
+	 */
+	private void graphColumn(Graphics2D g2D) {
+		model.loadPoints();
+		int xCount = -maxX + 3 * tickX / 4;
+		int yCount = -maxX + tickX;
+
+		// load all points in dataset
+		for (Model.Point point : model.loadPointList()) {
+			// draw X values
+			g2D.setColor(Color.RED);
+			if (point.xValue > 0)
+				g2D.fillRect(xCount, 0, tickX / 4, (int) point.xValue);
+			else
+				g2D.fillRect(xCount, (int) point.xValue, tickX / 4,
+						-(int) point.xValue);
+			xCount += tickX;
+			// draw Y values
+			g2D.setColor(Color.BLUE);
+			if (point.yValue > 0)
+				g2D.fillRect(yCount, 0, tickX / 4, (int) point.yValue);
+			if (point.yValue < 0)
+				g2D.fillRect(yCount, (int) point.yValue, tickX / 4,
+						-(int) point.yValue);
+			yCount += tickX;
+		}
+	}
+
+	private void drawTrendLine(Graphics2D g2D) {
+		g2D.setColor(Color.BLACK);
+		model.linearRegression();
+		g2D.scale(1, -1);
+		g2D.drawString(model.getLRFormula(), -maxX + 30, -maxY + 30);
+		g2D.scale(1, -1);
+		Model.Point p1 = model.getStartPoint();
+		Model.Point p2 = model.getEndPoint();
+		g2D.drawLine((int) p1.xValue, (int) p1.yValue, (int) p2.xValue,
+				(int) p2.yValue);
 	}
 }

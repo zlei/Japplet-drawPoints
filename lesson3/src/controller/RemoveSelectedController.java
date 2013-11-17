@@ -12,6 +12,11 @@ public class RemoveSelectedController {
 		this.model = model;
 	}
 
+	/**
+	 * Remove selected data points
+	 * @param mainApplet
+	 * @return
+	 */
 	public boolean removePoint(MainApplet mainApplet) {
 		int[] row = mainApplet.getDataList().getSelectedIndices();
 		if (row.length == 0) {
