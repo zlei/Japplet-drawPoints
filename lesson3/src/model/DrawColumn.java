@@ -32,7 +32,7 @@ public class DrawColumn extends DrawBasicGraph {
 		String value;
 		while (count < model.getDataset().size() + 1) {
 			value = Integer.toString(count);
-			g2D.drawString(value, -maxX + count * tickX, 5);
+			g2D.drawString(value, -maxX + count * tickX, 15);
 			count++;
 		}
 

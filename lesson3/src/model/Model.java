@@ -155,6 +155,7 @@ public class Model {
 			file.delete();
 		}
 		file.createNewFile();
+
 		FileWriter fstream = new FileWriter(file.getAbsoluteFile(), true);
 		BufferedWriter writer = new BufferedWriter(fstream);
 		for (String data : dataset) {

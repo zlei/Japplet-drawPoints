@@ -9,6 +9,7 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JRadioButton;
@@ -52,19 +53,15 @@ public class MainApplet extends JApplet {
 	private JCheckBox chckbx_grid;
 	private JCheckBox chckbx_Axis;
 
-	private String selectedRow;
-	private static int basic_plot = 0;
-	private static int cartesian_plot = 1;
-	private static int column_plot = 2;
-
 	// private String FILENAME =
 	// "/home/zlei/public_html/cs509/lesson3/dataset.txt";
+
+	private String FILENAME = "dataset.txt";
+
 	// private String FILENAME =
-	// "/Users/zhenhao/Documents/workspace/cs509/Japplet-drawPoints/lesson3/data.txt";
+	// "/Users/zhenhao/Documents/workspace/cs509/Japplet-drawPoints/lesson3/dataset.txt";
 
-	private String FILENAME = "/Users/zhenhao/Documents/workspace/cs509/Japplet-drawPoints/lesson3/dataset.txt";
-
-	// private JFileChooser fc = new JFileChooser(FILENAME);
+	private JFileChooser fc = new JFileChooser(FILENAME);
 
 	public MainApplet() {
 
@@ -80,17 +77,17 @@ public class MainApplet extends JApplet {
 		btn_load_data.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
-				/*
-				 * int returnVal = fc.showOpenDialog(MainApplet.this);
-				 * 
-				 * if (returnVal == JFileChooser.APPROVE_OPTION) { FILENAME =
-				 * fc.getSelectedFile().toString();
-				 */
-				if (new LoadFileController(MainApplet.this.model).loadFile(
-						FILENAME, MainApplet.this)) {
-					refreshList();
+				int returnVal = fc.showOpenDialog(MainApplet.this);
 
-					panel.repaint();
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					FILENAME = fc.getSelectedFile().toString();
+
+					if (new LoadFileController(MainApplet.this.model).loadFile(
+							FILENAME, MainApplet.this)) {
+						refreshList();
+
+						panel.repaint();
+					}
 				}
 			}
 		});
@@ -98,12 +95,13 @@ public class MainApplet extends JApplet {
 		btn_save_data = new JButton("Save Data");
 		btn_save_data.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				/*
-				 * int returnVal = fc.showOpenDialog(MainApplet.this); if
-				 * (returnVal == JFileChooser.APPROVE_OPTION) { FILENAME =
-				 * fc.getSelectedFile().toString(); // This is where a real
-				 * application would open the file. }
-				 */
+
+				int returnVal = fc.showOpenDialog(MainApplet.this);
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					FILENAME = fc.getSelectedFile().toString();
+					// This is where a real application would open the file.
+				}
+
 				new SaveFileController(MainApplet.this.model)
 						.saveFile(FILENAME);
 				panel.repaint();
