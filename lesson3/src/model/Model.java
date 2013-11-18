@@ -1,7 +1,10 @@
 package model;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,16 +23,18 @@ public class Model {
 	// two points to draw linear regression graph
 	Point startPoint = new Point();
 	Point endPoint = new Point();
+	// two points with largest absolute x, y values to scale coordinate system
+	Point rangePoint = new Point();
+	float rangeX = 0;
+	float rangeY = 0;
 
 	public Model() {
-		dataset.add("12.3 , 2.3");
-		dataset.add("22.5 ,-23.3");
-		dataset.add("32.3 , 98.2");
-		dataset.add("-43.3 , -5.5");
-		dataset.add("-23.2 , 21.3");
-		dataset.add("15.2 , 24");
-		dataset.add("-32 , -89.3");
-	}
+		/*
+		 * dataset.add("12.3 , 2.3"); dataset.add("22.5 ,-23.3");
+		 * dataset.add("32.3 , 98.2"); dataset.add("-43.3 , -5.5");
+		 * dataset.add("-23.2 , 21.3"); dataset.add("15.2 , 24");
+		 * dataset.add("-32 , -89.3");
+		 */}
 
 	// holding point
 	public class Point {
@@ -61,11 +66,16 @@ public class Model {
 	public HashMap<Integer, Point> loadDataset(String filepath)
 			throws FileNotFoundException {
 		int index = 0;
+		points.clear();
+		dataset.clear();
+		pointList.clear();
 		Scanner s = new Scanner(new File(filepath));
-		while (s.hasNext()) {
-			points.put(index, createPoint(s.nextLine()));
+		//dataset should be smaller than 2048
+		while (s.hasNext() && index < 2048) {
+			String data = s.nextLine();
+			dataset.add(data);
+			points.put(index, createPoint(data));
 			index++;
-			dataset.add(printPoint());
 		}
 		s.close();
 		return points;
@@ -139,8 +149,19 @@ public class Model {
 		return pointForPrint;
 	}
 
-	public void saveDataset() {
-
+	public void saveDataset(String filepath) throws IOException {
+		File file = new File(filepath);
+		if (file.exists()) {
+			file.delete();
+		}
+		file.createNewFile();
+		FileWriter fstream = new FileWriter(file.getAbsoluteFile(), true);
+		BufferedWriter writer = new BufferedWriter(fstream);
+		for (String data : dataset) {
+			writer.write(data);
+			writer.newLine();
+		}
+		writer.close();
 	}
 
 	public void setDataset() {
@@ -150,11 +171,12 @@ public class Model {
 	/**
 	 * linear regression function to estimate trend lin
 	 */
-	public void linearRegression() {
+	public boolean linearRegression() {
 		int MAXN = 1000;
 		int n = 0;
 		float[] x = new float[MAXN];
 		float[] y = new float[MAXN];
+		loadPointList();
 		if (!pointList.isEmpty()) {
 			// first pass: read in data, compute xbar and ybar
 			float sumx = 0, sumy = 0, sumx2 = 0;
@@ -182,28 +204,30 @@ public class Model {
 			beta0 = Float.parseFloat(new DecimalFormat("##.##").format(beta0));
 
 			formula = "y = " + beta1 + " * x + " + beta0;
+
 			startPoint.xValue = -200;
 			startPoint.yValue = beta1 * (-200) + beta0;
 			endPoint.xValue = 200;
 			endPoint.yValue = beta1 * 200 + beta0;
-
-			/*
-			 * // analyze results int df = n - 2; float rss = 0.0; // residual
-			 * sum of squares float ssr = 0.0; // regression sum of squares for
-			 * (int i = 0; i < n; i++) { float fit = beta1 * x[i] + beta0; rss
-			 * += (fit - y[i]) * (fit - y[i]); ssr += (fit - ybar) * (fit -
-			 * ybar); } float R2 = ssr / yybar; float svar = rss / df; float
-			 * svar1 = svar / xxbar; float svar0 = svar / n + xbar * xbar *
-			 * svar1; System.out.println("R^2                 = " + R2);
-			 * System.out.println("std error of beta_1 = " + Math.sqrt(svar1));
-			 * System.out.println("std error of beta_0 = " + Math.sqrt(svar0));
-			 * svar0 = svar * sumx2 / (n * xxbar);
-			 * System.out.println("std error of beta_0 = " + Math.sqrt(svar0));
-			 * 
-			 * System.out.println("SSTO = " + yybar);
-			 * System.out.println("SSE  = " + rss); System.out.println("SSR  = "
-			 * + ssr);
-			 */}
+			return true;
+		}
+		return false;
+		/*
+		 * // analyze results int df = n - 2; float rss = 0.0; // residual sum
+		 * of squares float ssr = 0.0; // regression sum of squares for (int i =
+		 * 0; i < n; i++) { float fit = beta1 * x[i] + beta0; rss += (fit -
+		 * y[i]) * (fit - y[i]); ssr += (fit - ybar) * (fit - ybar); } float R2
+		 * = ssr / yybar; float svar = rss / df; float svar1 = svar / xxbar;
+		 * float svar0 = svar / n + xbar * xbar * svar1;
+		 * System.out.println("R^2                 = " + R2);
+		 * System.out.println("std error of beta_1 = " + Math.sqrt(svar1));
+		 * System.out.println("std error of beta_0 = " + Math.sqrt(svar0));
+		 * svar0 = svar * sumx2 / (n * xxbar);
+		 * System.out.println("std error of beta_0 = " + Math.sqrt(svar0));
+		 * 
+		 * System.out.println("SSTO = " + yybar); System.out.println("SSE  = " +
+		 * rss); System.out.println("SSR  = " + ssr);
+		 */
 	}
 
 	public ArrayList<String> getDataset() {
@@ -220,6 +244,33 @@ public class Model {
 
 	public float getCurrentPointY() {
 		return point.yValue;
+	}
+
+	public void getRange() {
+		// default range
+		rangePoint.xValue = 0;
+		rangePoint.yValue = 0;
+		loadPointList();
+		if (pointList != null) {
+			for (Point point : pointList) {
+				if (Math.abs(point.xValue) > Math.abs(rangePoint.xValue))
+					rangePoint.xValue = Math.abs(point.xValue);
+			}
+			rangeX = rangePoint.xValue;
+			for (Point point : pointList) {
+				if (Math.abs(point.yValue) > Math.abs(rangePoint.yValue))
+					rangePoint.yValue = Math.abs(point.yValue);
+			}
+			rangeY = rangePoint.yValue;
+		}
+	}
+
+	public float getRangeX() {
+		return rangeX;
+	}
+
+	public float getRangeY() {
+		return rangeY;
 	}
 
 	public String getLRFormula() {

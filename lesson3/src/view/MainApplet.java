@@ -2,7 +2,6 @@ package view;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileNotFoundException;
 
 import javax.swing.DefaultListModel;
 import javax.swing.GroupLayout;
@@ -22,8 +21,16 @@ import javax.swing.event.ListSelectionListener;
 
 import model.Model;
 import controller.AddPointController;
+import controller.BasicGraphController;
+import controller.CartesianController;
+import controller.ColumnController;
 import controller.EditPointController;
+import controller.LoadFileController;
 import controller.RemoveSelectedController;
+import controller.SaveFileController;
+import controller.ShowAxisController;
+import controller.ShowGridController;
+import controller.TrendLineController;
 
 public class MainApplet extends JApplet {
 	Model model;
@@ -50,29 +57,56 @@ public class MainApplet extends JApplet {
 	private static int cartesian_plot = 1;
 	private static int column_plot = 2;
 
+	// private String FILENAME =
+	// "/home/zlei/public_html/cs509/lesson3/dataset.txt";
+	// private String FILENAME =
+	// "/Users/zhenhao/Documents/workspace/cs509/Japplet-drawPoints/lesson3/data.txt";
+
+	private String FILENAME = "/Users/zhenhao/Documents/workspace/cs509/Japplet-drawPoints/lesson3/dataset.txt";
+
+	// private JFileChooser fc = new JFileChooser(FILENAME);
+
 	public MainApplet() {
 
 		model = new Model();
-		// panel = new MyBasicPanel(cartesian_plot);
-		panel = new MyBasicPanel(MainApplet.this.model, basic_plot);
+		// panel = new MyBasicPanel(model);
+		panel = new BasicGraphController(MainApplet.this.model)
+				.drawBasic(MainApplet.this);
+		// panel = new MyBasicPanel(MainApplet.this.model, basic_plot);
 
 		scrollPane = new JScrollPane();
 
 		btn_load_data = new JButton("Load Data");
 		btn_load_data.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				try {
-					model.loadDataset("dataset.txt");
+
+				/*
+				 * int returnVal = fc.showOpenDialog(MainApplet.this);
+				 * 
+				 * if (returnVal == JFileChooser.APPROVE_OPTION) { FILENAME =
+				 * fc.getSelectedFile().toString();
+				 */
+				if (new LoadFileController(MainApplet.this.model).loadFile(
+						FILENAME, MainApplet.this)) {
 					refreshList();
-				} catch (FileNotFoundException e1) {
-					e1.printStackTrace();
+
+					panel.repaint();
 				}
 			}
 		});
 
 		btn_save_data = new JButton("Save Data");
 		btn_save_data.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
+			public void actionPerformed(ActionEvent e) {
+				/*
+				 * int returnVal = fc.showOpenDialog(MainApplet.this); if
+				 * (returnVal == JFileChooser.APPROVE_OPTION) { FILENAME =
+				 * fc.getSelectedFile().toString(); // This is where a real
+				 * application would open the file. }
+				 */
+				new SaveFileController(MainApplet.this.model)
+						.saveFile(FILENAME);
+				panel.repaint();
 			}
 		});
 
@@ -119,9 +153,15 @@ public class MainApplet extends JApplet {
 				rdbtn_CartesianPlot.setSelected(true);
 				rdbtn_ColumnPlot.setSelected(false);
 				if (rdbtn_CartesianPlot.isSelected()) {
-					panel.setType(cartesian_plot);
-					panel.repaint();
+					new CartesianController(MainApplet.this.model)
+							.drawCartesian(MainApplet.this);
+					chckbx_trend_line.setSelected(false);
+					chckbx_grid.setSelected(false);
+					chckbx_Axis.setSelected(false);
+
 				}
+
+				panel.repaint();
 			}
 		});
 		rdbtn_ColumnPlot = new JRadioButton("Column Plot");
@@ -130,32 +170,44 @@ public class MainApplet extends JApplet {
 				rdbtn_ColumnPlot.setSelected(true);
 				rdbtn_CartesianPlot.setSelected(false);
 				if (rdbtn_ColumnPlot.isSelected()) {
-					panel.setType(column_plot);
-					panel.repaint();
+					new ColumnController(MainApplet.this.model)
+							.drawColumn(MainApplet.this);
+					chckbx_trend_line.setSelected(false);
+					chckbx_grid.setSelected(false);
+					chckbx_Axis.setSelected(false);
 				}
+
+				panel.repaint();
 			}
 		});
 
 		chckbx_trend_line = new JCheckBox("Show Trend Line");
 		chckbx_trend_line.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				panel.changeTrendline();
+				new TrendLineController(MainApplet.this.model)
+						.changeTrendline(MainApplet.this);
+
 				panel.repaint();
 			}
+
 		});
 
-		chckbx_grid = new JCheckBox("Show Grid");
+		chckbx_grid = new JCheckBox("Show Horizontal Lines");
 		chckbx_grid.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				panel.changeGrid();
+				new ShowGridController(MainApplet.this.model)
+						.changeGrid(MainApplet.this);
 				panel.repaint();
 			}
+
 		});
 
 		chckbx_Axis = new JCheckBox("Show Axis");
 		chckbx_Axis.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				panel.changeAxis();
+				new ShowAxisController(MainApplet.this.model)
+						.changeAxis(MainApplet.this);
+
 				panel.repaint();
 			}
 		});
@@ -222,7 +274,7 @@ public class MainApplet extends JApplet {
 																										.addComponent(
 																												chckbx_grid,
 																												GroupLayout.PREFERRED_SIZE,
-																												103,
+																												175,
 																												GroupLayout.PREFERRED_SIZE)
 																										.addPreferredGap(
 																												ComponentPlacement.RELATED)
@@ -416,6 +468,10 @@ public class MainApplet extends JApplet {
 		return list_data;
 	}
 
+	public JScrollPane getScrollPane() {
+		return scrollPane;
+	}
+
 	public JTextField getXValue() {
 		return text_xValue;
 	}
@@ -426,5 +482,9 @@ public class MainApplet extends JApplet {
 
 	public String getSelectedRow() {
 		return list_data.getSelectedValue().toString();
+	}
+
+	public MyBasicPanel getMyPanel() {
+		return panel;
 	}
 }
