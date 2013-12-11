@@ -1,9 +1,17 @@
 package model;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.Properties;
 
-public class DrawBasicGraph {
+import javax.swing.JPanel;
+
+import view.MyBasicPanel;
+import dataset.IDataSet;
+import dataset.IGraph;
+
+public class DrawBasicGraph implements IGraph {
 	Model model;
 
 	/** The instantiating applet's width. */
@@ -31,11 +39,12 @@ public class DrawBasicGraph {
 	/** Plot type */
 	private int type = 0;
 
-	private boolean setgrid = false;
+	/** Set all default properties to off */
+	private String setgrid = "Off";
 
-	private boolean setaxis = false;
+	private String setaxis = "Off";
 
-	private boolean setTrendline = false;
+	private String setTrendline = "Off";
 
 	private Graphics2D g2D;
 
@@ -43,49 +52,17 @@ public class DrawBasicGraph {
 
 	private ColumnGraph drawColumn;
 
-	private DrawTrendline drawTrendline;
+	// private DrawTrendline drawTrendline;
 
 	/*
 	 * public DrawBasicGraph(boolean setgrid, boolean setaxis, boolean
 	 * setTrendline, Graphics2D g2D) { this.setgrid = setgrid; this.setaxis =
 	 * setaxis; this.setTrendline = setTrendline; this.g2D = g2D; }
 	 */
-	public DrawBasicGraph(Model model) {
-		this.model = model;
-	}
-
-	public void paint(Graphics2D g2D) {
-		width = 500;
-		height = 500;
-		// width = this.getSize().width;
-		// height = this.getSize().height;
-
-		// Hard coding the major subdivisions on each axis.
-		// setRange();
-		// Hard coding the major subdivisions on each axis.
-		this.g2D = g2D;
-		setScale(10, 10);
-
-		setCoordSystem(g2D);
-		if (setgrid) {
-			setBackGrid(g2D);
-		}
-		if (setaxis) {
-			g2D.scale(1, -1);
-			setAxis(g2D);
-			g2D.scale(1, -1);
-		}
-		if (setTrendline) {
-			drawTrendline(g2D);
-		}
-		setGraph(g2D);
+	public DrawBasicGraph() {
 	}
 
 	public void drawTrendline(Graphics2D g2D) {
-
-	}
-
-	public void setGraph(Graphics2D g2D) {
 
 	}
 
@@ -96,24 +73,6 @@ public class DrawBasicGraph {
 	 */
 	public void setType(int type) {
 		this.type = type;
-	}
-
-	/**
-	 * Show background grid or not
-	 */
-	public void changeGrid() {
-		setgrid = !setgrid;
-	}
-
-	/**
-	 * Show axis or not
-	 */
-	public void changeAxis() {
-		setaxis = !setaxis;
-	}
-
-	public void changeTrendline() {
-		setTrendline = !setTrendline;
 	}
 
 	/**
@@ -132,9 +91,10 @@ public class DrawBasicGraph {
 	}
 
 	public void setRange() {
-		model.getRange();
-		scaleX = model.getRangeX() / width;
-		scaleY = model.getRangeY() / height;
+		scaleX = (float) (model.getDataSet().getMaxX() - model.getDataSet()
+				.getMinX()) / width;
+		scaleY = (float) (model.getDataSet().getMaxY() - model.getDataSet()
+				.getMinY()) / height;
 	}
 
 	/**
@@ -211,5 +171,49 @@ public class DrawBasicGraph {
 			}
 			count = count + tickY;
 		}
+	}
+
+	@Override
+	public void setDataSet(IDataSet ds) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void draw(Graphics g, JPanel panel) {
+		// TODO Auto-generated method stub
+		width = 500;
+		height = 500;
+		MyBasicPanel myPanel = (MyBasicPanel) panel;
+		model = myPanel.getModel();
+		// width = this.getSize().width;
+		// height = this.getSize().height;
+
+		// Hard coding the major subdivisions on each axis.
+		// setRange();
+		// Hard coding the major subdivisions on each axis.
+		this.g2D = (Graphics2D) g;
+		setScale(10, 10);
+
+		setCoordSystem(g2D);
+		setaxis = model.getProps().getProperty("Axis");
+		setgrid = model.getProps().getProperty("Grid");
+		setTrendline = model.getProps().getProperty("TrendLine");
+		if (setgrid.equals("On")) {
+			setBackGrid(g2D);
+		}
+		if (setaxis.equals("On")) {
+			g2D.scale(1, -1);
+			setAxis(g2D);
+			g2D.scale(1, -1);
+		}
+		if (setTrendline.equals("On")) {
+			drawTrendline(g2D);
+		}
+	}
+
+	@Override
+	public void setProperties(Properties p) {
+		// TODO Auto-generated method stub
+
 	}
 }

@@ -9,9 +9,10 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -35,9 +36,9 @@ import controller.TrendLineController;
 
 public class MainApplet extends JApplet {
 	Model model;
+
 	private MyBasicPanel panel;
-	private JScrollPane scrollPane;
-	private JList list_data;
+
 	private JButton btn_load_data;
 	private JButton btn_save_data;
 	private JButton btn_delete_data;
@@ -47,62 +48,43 @@ public class MainApplet extends JApplet {
 	private JLabel label_y;
 	private JTextField text_yValue;
 	private JButton btn_add_data;
-	private JRadioButton rdbtn_CartesianPlot;
-	private JRadioButton rdbtn_ColumnPlot;
-	private JRadioButton rdbtn_HorizontalBarPlot;
 	private JCheckBox chckbx_trend_line;
 	private JCheckBox chckbx_grid;
 	private JCheckBox chckbx_Axis;
+	private JComboBox comboBox;
+	private String[] graphType = { "Cartesian Plot", "Column Plot",
+			"Horizonal Bar Plot", "Multi Line Plot" };
 
-	// private String FILENAME =
-	// "/home/zlei/public_html/cs509/lesson3/dataset.txt";
-
-	// private String FILENAME = "dataset.txt";
-
-	private String FILENAME = "/Users/zhenhao/Documents/workspace/cs509/Japplet-drawPoints/lesson3/dataset.txt";
-
-	private JFileChooser fc = new JFileChooser(FILENAME);
+	JScrollPane scrollPane;
+	JList list;
 
 	public MainApplet() {
 
 		model = new Model();
 		panel = new MyBasicPanel(model);
-		// panel = new BasicGraphController(MainApplet.this.model)
-		// .drawBasic(MainApplet.this);
 
 		scrollPane = new JScrollPane();
+		list = new JList();
+		list.setModel(new DefaultListModel());
+		scrollPane.setViewportView(list);
+		list.setFixedCellHeight(30);
+		list.setFixedCellWidth(80);
+		list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
 		btn_load_data = new JButton("Load Data");
 		btn_load_data.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
-				/*
-				 * int returnVal = fc.showOpenDialog(MainApplet.this);
-				 * 
-				 * if (returnVal == JFileChooser.APPROVE_OPTION) { FILENAME =
-				 * fc.getSelectedFile().toString();
-				 */
-				if (new LoadFileController(MainApplet.this.model).loadFile(
-						FILENAME, MainApplet.this)) {
-					refreshList();
-					panel.repaint();
-				}
+				new LoadFileController(MainApplet.this.model)
+						.loadFile(MainApplet.this);
 			}
 		});
 
 		btn_save_data = new JButton("Save Data");
 		btn_save_data.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-
-				int returnVal = fc.showOpenDialog(MainApplet.this);
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					FILENAME = fc.getSelectedFile().toString();
-					// This is where a real application would open the file.
-				}
-
 				new SaveFileController(MainApplet.this.model)
-						.saveFile(FILENAME);
-				panel.repaint();
+						.saveFile(MainApplet.this);
 			}
 		});
 
@@ -111,7 +93,6 @@ public class MainApplet extends JApplet {
 			public void actionPerformed(ActionEvent e) {
 				new RemoveSelectedController(MainApplet.this.model)
 						.removePoint(MainApplet.this);
-				panel.repaint();
 			}
 		});
 
@@ -120,16 +101,26 @@ public class MainApplet extends JApplet {
 			public void actionPerformed(ActionEvent e) {
 				new AddPointController(MainApplet.this.model)
 						.addPoint(MainApplet.this);
-				panel.repaint();
+
 			}
 		});
 
-		btn_edit_data = new JButton("Update Selected Data");
+		list.addListSelectionListener(new ListSelectionListener() {
+			public void valueChanged(ListSelectionEvent e) {
+				if (e.getValueIsAdjusting()) {
+					return;
+				} else {
+					new EditPointController(MainApplet.this.model)
+							.setEditable(MainApplet.this);
+				}
+			}
+		});
+
+		btn_edit_data = new JButton("Edit Selected Data");
 		btn_edit_data.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				new EditPointController(MainApplet.this.model)
-						.updatePoint(MainApplet.this);
-				panel.repaint();
+						.editPoint(MainApplet.this);
 			}
 		});
 
@@ -143,61 +134,12 @@ public class MainApplet extends JApplet {
 		text_yValue = new JTextField();
 		text_yValue.setColumns(10);
 
-		rdbtn_CartesianPlot = new JRadioButton("Cartesian Plot");
-		rdbtn_CartesianPlot.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				rdbtn_CartesianPlot.setSelected(true);
-				rdbtn_ColumnPlot.setSelected(false);
-				if (rdbtn_CartesianPlot.isSelected()) {
-					new CartesianController(MainApplet.this.model)
-							.drawCartesian(MainApplet.this);
-					chckbx_trend_line.setSelected(false);
-					chckbx_grid.setSelected(false);
-					chckbx_Axis.setSelected(false);
-
-				}
-
-				panel.repaint();
-			}
-		});
-		rdbtn_ColumnPlot = new JRadioButton("Column Plot");
-		rdbtn_ColumnPlot.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				rdbtn_ColumnPlot.setSelected(true);
-				rdbtn_CartesianPlot.setSelected(false);
-				if (rdbtn_ColumnPlot.isSelected()) {
-					new ColumnController(MainApplet.this.model)
-							.drawColumn(MainApplet.this);
-					chckbx_trend_line.setSelected(false);
-					chckbx_grid.setSelected(false);
-					chckbx_Axis.setSelected(false);
-				}
-
-				panel.repaint();
-			}
-		});
-
-		rdbtn_HorizontalBarPlot = new JRadioButton("HorizontalBar Plot");
-		rdbtn_HorizontalBarPlot.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (rdbtn_HorizontalBarPlot.isSelected()) {
-					new HorizontalBarController(MainApplet.this.model)
-							.drawHorizontalBar(MainApplet.this);
-					chckbx_trend_line.setSelected(false);
-					chckbx_grid.setSelected(false);
-					chckbx_Axis.setSelected(false);
-				}
-				panel.repaint();
-			}
-		});
-
 		chckbx_trend_line = new JCheckBox("Show Trend Line");
+		chckbx_trend_line.setEnabled(false);
 		chckbx_trend_line.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				new TrendLineController(MainApplet.this.model)
 						.changeTrendline(MainApplet.this);
-
-				panel.repaint();
 			}
 
 		});
@@ -207,7 +149,6 @@ public class MainApplet extends JApplet {
 			public void actionPerformed(ActionEvent e) {
 				new ShowGridController(MainApplet.this.model)
 						.changeGrid(MainApplet.this);
-				panel.repaint();
 			}
 
 		});
@@ -215,10 +156,37 @@ public class MainApplet extends JApplet {
 		chckbx_Axis = new JCheckBox("Show Axis");
 		chckbx_Axis.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+
 				new ShowAxisController(MainApplet.this.model)
 						.changeAxis(MainApplet.this);
+			}
+		});
 
-				panel.repaint();
+		comboBox = new JComboBox(graphType);
+		comboBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				chckbx_trend_line.setSelected(false);;
+				int pos = comboBox.getSelectedIndex();
+				switch (pos) {
+				case 0:
+					chckbx_trend_line.setEnabled(true);
+					new CartesianController(MainApplet.this.model)
+							.drawCartesian(MainApplet.this);
+					break;
+				case 1:
+					chckbx_trend_line.setEnabled(false);
+					new ColumnController(MainApplet.this.model)
+							.drawColumn(MainApplet.this);
+					break;
+				case 2:
+					chckbx_trend_line.setEnabled(false);
+					new HorizontalBarController(MainApplet.this.model)
+							.drawHorizontalBar(MainApplet.this);
+					break;
+				case 3:
+					chckbx_trend_line.setEnabled(false);
+					break;
+				}
 			}
 		});
 
@@ -270,107 +238,77 @@ public class MainApplet extends JApplet {
 																				GroupLayout.PREFERRED_SIZE,
 																				65,
 																				GroupLayout.PREFERRED_SIZE)))
+										.addGap(18)
 										.addGroup(
 												groupLayout
 														.createParallelGroup(
 																Alignment.LEADING)
+														.addComponent(
+																panel,
+																GroupLayout.PREFERRED_SIZE,
+																483,
+																GroupLayout.PREFERRED_SIZE)
 														.addGroup(
 																groupLayout
 																		.createSequentialGroup()
-																		.addGroup(
-																				groupLayout
-																						.createParallelGroup(
-																								Alignment.LEADING)
-																						.addGroup(
-																								groupLayout
-																										.createSequentialGroup()
-																										.addGap(6)
-																										.addComponent(
-																												btn_add_data,
-																												GroupLayout.PREFERRED_SIZE,
-																												107,
-																												GroupLayout.PREFERRED_SIZE)
-																										.addPreferredGap(
-																												ComponentPlacement.RELATED))
-																						.addGroup(
-																								groupLayout
-																										.createSequentialGroup()
-																										.addGap(18)
-																										.addComponent(
-																												rdbtn_HorizontalBarPlot,
-																												GroupLayout.PREFERRED_SIZE,
-																												119,
-																												GroupLayout.PREFERRED_SIZE)
-																										.addPreferredGap(
-																												ComponentPlacement.RELATED)))
-																		.addGroup(
-																				groupLayout
-																						.createParallelGroup(
-																								Alignment.LEADING)
-																						.addGroup(
-																								groupLayout
-																										.createSequentialGroup()
-																										.addGap(6)
-																										.addComponent(
-																												btn_edit_data,
-																												GroupLayout.PREFERRED_SIZE,
-																												158,
-																												GroupLayout.PREFERRED_SIZE)
-																										.addPreferredGap(
-																												ComponentPlacement.RELATED)
-																										.addComponent(
-																												btn_delete_data,
-																												GroupLayout.PREFERRED_SIZE,
-																												158,
-																												GroupLayout.PREFERRED_SIZE)
-																										.addPreferredGap(
-																												ComponentPlacement.RELATED)
-																										.addComponent(
-																												btn_load_data)
-																										.addPreferredGap(
-																												ComponentPlacement.RELATED)
-																										.addComponent(
-																												btn_save_data))
-																						.addGroup(
-																								groupLayout
-																										.createSequentialGroup()
-																										.addGap(29)
-																										.addComponent(
-																												chckbx_trend_line)
-																										.addPreferredGap(
-																												ComponentPlacement.RELATED)
-																										.addComponent(
-																												chckbx_grid,
-																												GroupLayout.PREFERRED_SIZE,
-																												175,
-																												GroupLayout.PREFERRED_SIZE)
-																										.addPreferredGap(
-																												ComponentPlacement.RELATED)
-																										.addComponent(
-																												chckbx_Axis,
-																												GroupLayout.PREFERRED_SIZE,
-																												112,
-																												GroupLayout.PREFERRED_SIZE))
-																						.addGroup(
-																								groupLayout
-																										.createSequentialGroup()
-																										.addGap(101)
-																										.addComponent(
-																												rdbtn_CartesianPlot)
-																										.addGap(76)
-																										.addComponent(
-																												rdbtn_ColumnPlot,
-																												GroupLayout.PREFERRED_SIZE,
-																												119,
-																												GroupLayout.PREFERRED_SIZE))))
-														.addGroup(
-																groupLayout
-																		.createSequentialGroup()
-																		.addGap(18)
 																		.addComponent(
-																				panel,
+																				comboBox,
 																				GroupLayout.PREFERRED_SIZE,
-																				523,
+																				149,
+																				GroupLayout.PREFERRED_SIZE)
+																		.addPreferredGap(
+																				ComponentPlacement.RELATED)
+																		.addComponent(
+																				chckbx_trend_line)
+																		.addPreferredGap(
+																				ComponentPlacement.RELATED)
+																		.addComponent(
+																				chckbx_Axis,
+																				GroupLayout.PREFERRED_SIZE,
+																				112,
+																				GroupLayout.PREFERRED_SIZE)
+																		.addPreferredGap(
+																				ComponentPlacement.RELATED,
+																				GroupLayout.DEFAULT_SIZE,
+																				Short.MAX_VALUE)
+																		.addComponent(
+																				chckbx_grid,
+																				GroupLayout.PREFERRED_SIZE,
+																				175,
+																				GroupLayout.PREFERRED_SIZE)
+																		.addGap(276))
+														.addGroup(
+																groupLayout
+																		.createSequentialGroup()
+																		.addComponent(
+																				btn_add_data,
+																				GroupLayout.PREFERRED_SIZE,
+																				107,
+																				GroupLayout.PREFERRED_SIZE)
+																		.addPreferredGap(
+																				ComponentPlacement.RELATED)
+																		.addComponent(
+																				btn_edit_data,
+																				GroupLayout.PREFERRED_SIZE,
+																				158,
+																				GroupLayout.PREFERRED_SIZE)
+																		.addPreferredGap(
+																				ComponentPlacement.RELATED)
+																		.addComponent(
+																				btn_delete_data,
+																				GroupLayout.PREFERRED_SIZE,
+																				158,
+																				GroupLayout.PREFERRED_SIZE)
+																		.addPreferredGap(
+																				ComponentPlacement.RELATED)
+																		.addComponent(
+																				btn_load_data)
+																		.addPreferredGap(
+																				ComponentPlacement.UNRELATED)
+																		.addComponent(
+																				btn_save_data,
+																				GroupLayout.PREFERRED_SIZE,
+																				248,
 																				GroupLayout.PREFERRED_SIZE)))
 										.addContainerGap()));
 		groupLayout
@@ -379,7 +317,7 @@ public class MainApplet extends JApplet {
 						.addGroup(
 								groupLayout
 										.createSequentialGroup()
-										.addGap(19)
+										.addGap(43)
 										.addGroup(
 												groupLayout
 														.createParallelGroup(
@@ -387,12 +325,12 @@ public class MainApplet extends JApplet {
 														.addComponent(
 																panel,
 																GroupLayout.DEFAULT_SIZE,
-																152,
+																323,
 																Short.MAX_VALUE)
 														.addComponent(
 																scrollPane,
 																GroupLayout.DEFAULT_SIZE,
-																152,
+																323,
 																Short.MAX_VALUE))
 										.addGap(12)
 										.addGroup(
@@ -406,99 +344,45 @@ public class MainApplet extends JApplet {
 																GroupLayout.DEFAULT_SIZE,
 																GroupLayout.PREFERRED_SIZE)
 														.addComponent(
-																rdbtn_CartesianPlot)
+																comboBox,
+																GroupLayout.PREFERRED_SIZE,
+																36,
+																GroupLayout.PREFERRED_SIZE)
 														.addComponent(
-																rdbtn_ColumnPlot)
+																chckbx_trend_line)
 														.addComponent(
-																rdbtn_HorizontalBarPlot))
+																chckbx_Axis)
+														.addComponent(
+																chckbx_grid))
 										.addPreferredGap(
 												ComponentPlacement.UNRELATED)
 										.addGroup(
 												groupLayout
 														.createParallelGroup(
-																Alignment.LEADING)
-														.addGroup(
-																groupLayout
-																		.createSequentialGroup()
-																		.addGroup(
-																				groupLayout
-																						.createParallelGroup(
-																								Alignment.BASELINE)
-																						.addComponent(
-																								chckbx_trend_line)
-																						.addComponent(
-																								chckbx_grid)
-																						.addComponent(
-																								chckbx_Axis))
-																		.addPreferredGap(
-																				ComponentPlacement.RELATED)
-																		.addGroup(
-																				groupLayout
-																						.createParallelGroup(
-																								Alignment.BASELINE)
-																						.addComponent(
-																								btn_add_data)
-																						.addComponent(
-																								btn_edit_data)
-																						.addComponent(
-																								btn_delete_data)
-																						.addComponent(
-																								btn_load_data)
-																						.addComponent(
-																								btn_save_data)))
-														.addGroup(
-																groupLayout
-																		.createParallelGroup(
-																				Alignment.BASELINE)
-																		.addComponent(
-																				label_y)
-																		.addComponent(
-																				text_yValue,
-																				GroupLayout.PREFERRED_SIZE,
-																				GroupLayout.DEFAULT_SIZE,
-																				GroupLayout.PREFERRED_SIZE)))
+																Alignment.BASELINE)
+														.addComponent(label_y)
+														.addComponent(
+																text_yValue,
+																GroupLayout.PREFERRED_SIZE,
+																GroupLayout.DEFAULT_SIZE,
+																GroupLayout.PREFERRED_SIZE)
+														.addComponent(
+																btn_add_data)
+														.addComponent(
+																btn_edit_data)
+														.addComponent(
+																btn_delete_data)
+														.addComponent(
+																btn_load_data)
+														.addComponent(
+																btn_save_data))
 										.addGap(19)));
 
-		refreshList();
 		getContentPane().setLayout(groupLayout);
-
 	}
 
-	/**
-	 * update JList
-	 */
-	public void refreshList() {
-		DefaultListModel defListModel = new DefaultListModel();
-		for (String testdata : model.getDataset()) {
-			defListModel.addElement(testdata);
-		}
-		list_data = new JList(defListModel);
-		scrollPane.setViewportView(list_data);
-		list_data.setFixedCellHeight(30);
-		list_data.setFixedCellWidth(80);
-		list_data
-				.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		list_data.addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent e) {
-				if (e.getValueIsAdjusting()) {
-					return;
-				} else {
-					if (!list_data.isSelectionEmpty()) {
-						new EditPointController(MainApplet.this.model)
-								.setEditable(MainApplet.this);
-						return;
-					}
-				}
-			}
-		});
-	}
-
-	public JList getDataList() {
-		return list_data;
-	}
-
-	public JScrollPane getScrollPane() {
-		return scrollPane;
+	public JList getJList() {
+		return list;
 	}
 
 	public JTextField getXValue() {
@@ -509,11 +393,7 @@ public class MainApplet extends JApplet {
 		return text_yValue;
 	}
 
-	public String getSelectedRow() {
-		return list_data.getSelectedValue().toString();
-	}
-
-	public MyBasicPanel getMyPanel() {
+	public JPanel getPanel() {
 		return panel;
 	}
 }

@@ -4,57 +4,47 @@ import javax.swing.DefaultListModel;
 
 import model.Model;
 import view.MainApplet;
+import view.MyBasicPanel;
 
 public class EditPointController {
 	Model model;
 	private int idx;
-
+	DefaultListModel list;
+	MyBasicPanel panel;
+	
 	public EditPointController(Model model) {
 		this.model = model;
 	}
 
-	/**
-	 * Get data from List, allow user to update data
-	 * 
-	 * @param mainApplet
-	 * @return
-	 */
 	public boolean setEditable(MainApplet mainApplet) {
-		String selectedRow = mainApplet.getSelectedRow();
-		idx = mainApplet.getDataList().getSelectedIndex();
+		idx = mainApplet.getJList().getSelectedIndex();
+		list = (DefaultListModel) mainApplet.getJList().getModel();
 
-		model.createPoint(selectedRow);
-		String currentX = Float.toString(model.getCurrentPointX());
-		String currentY = Float.toString(model.getCurrentPointY());
+		if (idx < 0)
+			return false;
 
-		mainApplet.getXValue().setText(currentX);
-		mainApplet.getYValue().setText(currentY);
+		String data = (String) list.getElementAt(idx);
+		String[] parts = data.split(",");
+		String x = parts[0];
+		String y = parts[1];
+
+		mainApplet.getXValue().setText(x);
+		mainApplet.getYValue().setText(y);
 
 		return true;
 	}
 
-	/**
-	 * Get data from user input to update data
-	 * 
-	 * @param mainApplet
-	 * @return
-	 */
-	public boolean updatePoint(MainApplet mainApplet) {
+	public boolean editPoint(MainApplet mainApplet) {
 		String pointXValue = mainApplet.getXValue().getText();
 		String pointYValue = mainApplet.getYValue().getText();
-		idx = mainApplet.getDataList().getSelectedIndex();
+		String point = pointXValue + " , " + pointYValue;
 
-		/*
-		 * if (pointXValue.length() == 0 || pointYValue.length() == 0) { return
-		 * false; }
-		 */
-		model.getPointFromInput(pointXValue, pointYValue);
+		list = (DefaultListModel) mainApplet.getJList().getModel();
+		list.set(idx, point);
+		model.getDataSet().editPoint(idx, point);
 
-		DefaultListModel list = (DefaultListModel) mainApplet.getDataList()
-				.getModel();
-		list.set(idx, model.printPoint());
-
-		model.updatePoint(idx, model.printPoint());
+		panel = (MyBasicPanel) mainApplet.getPanel();
+		panel.repaint();
 
 		return true;
 	}

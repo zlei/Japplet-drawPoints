@@ -5,11 +5,9 @@ import java.awt.Graphics2D;
 
 import javax.swing.JPanel;
 
-import model.CartesianGraph;
-import model.ColumnGraph;
 import model.DrawBasicGraph;
-import model.HorizontalBarGraph;
 import model.Model;
+import dataset.IGraph;
 
 public class MyBasicPanel extends JPanel {
 
@@ -17,6 +15,8 @@ public class MyBasicPanel extends JPanel {
 
 	int type;
 
+	//default gg
+	IGraph gg = null;
 	/*
 	 * public MyBasicPanel(Model model, int type) { this.model = model;
 	 * this.type = type; }
@@ -25,25 +25,20 @@ public class MyBasicPanel extends JPanel {
 		this.model = model;
 	}
 
-	DrawBasicGraph drawGraph = new DrawBasicGraph(model);
-
-	public void setType(int type) {
-		switch (type) {
-		case 0:
-			drawGraph = new DrawBasicGraph(model);
-			break;
-		case 1:
-			drawGraph = new CartesianGraph(model);
-			break;
-		case 2:
-			drawGraph = new ColumnGraph(model);
-			break;
-		case 3:
-			drawGraph = new HorizontalBarGraph(model);
-			break;
+	public boolean drawGraph() {
+		String graphType = model.getProps().getProperty("GraphType");
+		try {
+			Class clazz = Class.forName(graphType);
+			gg = (IGraph) clazz.newInstance();
+			gg.setDataSet(model.getDataSet());
+			gg.setProperties(model.getProps());
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
 		}
-		this.type = type;
+		return true;
 	}
+
 
 	/**
 	 * Draws the defined function.
@@ -53,16 +48,13 @@ public class MyBasicPanel extends JPanel {
 	 */
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
+		drawGraph();
 		// setType(type);
 		Graphics2D g2D = (Graphics2D) g;
-		drawGraph.paint(g2D);
-	}
-
-	public DrawBasicGraph getBasicPanel() {
-		return drawGraph;
+		gg.draw(g2D, this);
 	}
 	
-	public int getCurrentType(){
-		return type;
+	public Model getModel(){
+		return model;
 	}
 }

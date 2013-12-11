@@ -1,6 +1,7 @@
 package controller;
 
-import model.DrawBasicGraph;
+import java.util.Properties;
+
 import model.Model;
 import view.MainApplet;
 import view.MyBasicPanel;
@@ -8,17 +9,22 @@ import view.MyBasicPanel;
 public class ShowGridController {
 	Model model;
 	MyBasicPanel panel;
-	private DrawBasicGraph drawBasic;
 
 	public ShowGridController(Model model) {
 		this.model = model;
 	}
 
 	public boolean changeGrid(MainApplet mainApplet) {
-		this.panel = mainApplet.getMyPanel();
-		this.drawBasic = panel.getBasicPanel();
-		drawBasic.changeGrid();
-//		panel.repaint();
+		Properties pp = model.getProps();
+		String status = pp.getProperty("Grid");
+		if (status.equals("On"))
+			pp.setProperty("Grid", "Off");
+		else
+			pp.setProperty("Grid", "On");
+
+		panel = (MyBasicPanel) mainApplet.getPanel();
+		panel.repaint();
+
 		return true;
 	}
 }

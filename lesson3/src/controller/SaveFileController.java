@@ -2,6 +2,9 @@ package controller;
 
 import java.io.IOException;
 
+import javax.swing.JFileChooser;
+
+import view.MainApplet;
 import model.Model;
 
 public class SaveFileController {
@@ -12,9 +15,17 @@ public class SaveFileController {
 		this.model = model;
 	}
 
-	public boolean saveFile(String filepath) {
+	public boolean saveFile(MainApplet main) {
+		JFileChooser fc = new JFileChooser();
+		if (fc.showSaveDialog(main) != JFileChooser.APPROVE_OPTION) {
+			return false;
+		}
+		
+		String FILENAME; 
+		FILENAME = fc.getSelectedFile().toString(); 
+		
 		try {
-			model.saveDataset(filepath);
+			model.getDataSet().saveDataset(FILENAME);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

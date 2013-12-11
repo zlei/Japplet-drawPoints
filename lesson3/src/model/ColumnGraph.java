@@ -7,15 +7,17 @@ import java.util.Properties;
 
 import javax.swing.JPanel;
 
-public class ColumnGraph extends DrawBasicGraph implements IGraph{
+import view.MyBasicPanel;
+import dataset.IDataSet;
+import dataset.IGraph;
+
+public class ColumnGraph extends DrawBasicGraph implements IGraph {
 
 	Model model;
 
 	Graphics2D g2D;
 
-	public ColumnGraph(Model model) {
-		super(model);
-		this.model = model;
+	public ColumnGraph() {
 	}
 
 	public void setCoordSystem(Graphics2D g2D) {
@@ -34,7 +36,7 @@ public class ColumnGraph extends DrawBasicGraph implements IGraph{
 		// Draw column axis
 		int count = 1;
 		String value;
-		while (count < model.getDataset().size() + 1) {
+		while (count < model.getDataSet().size() + 1) {
 			value = Integer.toString(count);
 			g2D.drawString(value, -maxX + count * tickX, 15);
 			count++;
@@ -53,46 +55,49 @@ public class ColumnGraph extends DrawBasicGraph implements IGraph{
 	}
 
 	public void setGraph(Graphics2D g2D) {
-		model.loadPoints();
-		int xCount = -maxX + 3 * tickX / 4;
-		int yCount = -maxX + tickX;
 
-		// load all points in dataset
-		for (Model.Point point : model.loadPointList()) {
-			// draw X values
-			g2D.setColor(Color.RED);
-			if (point.xValue > 0)
-				g2D.fillRect(xCount, 0, tickX / 4, (int) point.xValue);
-			else
-				g2D.fillRect(xCount, (int) point.xValue, tickX / 4,
-						-(int) point.xValue);
-			xCount += tickX;
-			// draw Y values
-			g2D.setColor(Color.BLUE);
-			if (point.yValue > 0)
-				g2D.fillRect(yCount, 0, tickX / 4, (int) point.yValue);
-			if (point.yValue < 0)
-				g2D.fillRect(yCount, (int) point.yValue, tickX / 4,
-						-(int) point.yValue);
-			yCount += tickX;
-		}
 	}
 
 	@Override
 	public void setDataSet(IDataSet ds) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void draw(Graphics g, JPanel panel) {
 		// TODO Auto-generated method stub
-		
+		MyBasicPanel myPanel = (MyBasicPanel) panel;
+		model = myPanel.getModel();
+
+		super.draw(g, panel);
+		this.g2D = (Graphics2D) g;
+		g2D.setBackground(Color.RED);
+
+		int xCount = -maxX + 3 * tickX / 4;
+		int yCount = -maxX + tickX;
+
+		// load all points in dataset
+		for (MyPoint point : model.getDataSet().loadPointList()) { 
+			// draw X values
+			g2D.setColor(Color.RED);
+			if (point.x > 0)
+				g2D.fillRect(xCount, 0, tickX / 4, (int) point.x);
+			else
+				g2D.fillRect(xCount, (int) point.x, tickX / 4, -(int) point.x);
+			xCount += tickX; // draw Y values
+			g2D.setColor(Color.BLUE);
+			if (point.y > 0)
+				g2D.fillRect(yCount, 0, tickX / 4, (int) point.y);
+			if (point.y < 0)
+				g2D.fillRect(yCount, (int) point.y, tickX / 4, -(int) point.y);
+			yCount += tickX;
+		}
 	}
 
 	@Override
 	public void setProperties(Properties p) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

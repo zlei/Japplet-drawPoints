@@ -1,6 +1,7 @@
 package controller;
 
-import model.DrawBasicGraph;
+import java.util.Properties;
+
 import model.Model;
 import view.MainApplet;
 import view.MyBasicPanel;
@@ -8,17 +9,20 @@ import view.MyBasicPanel;
 public class TrendLineController {
 	Model model;
 	MyBasicPanel panel;
-	DrawBasicGraph drawBasic;
-
 	public TrendLineController(Model model) {
 		this.model = model;
 	}
 
 	public boolean changeTrendline(MainApplet mainApplet) {
-		this.panel = mainApplet.getMyPanel();
-		this.drawBasic = panel.getBasicPanel();
-		drawBasic.changeTrendline();
-//		panel.repaint();
+		Properties pp = model.getProps();
+		String status = pp.getProperty("TrendLine");
+		if (status.equals("On"))
+			pp.setProperty("TrendLine", "Off");
+		else pp.setProperty("TrendLine", "On");
+		
+		panel = (MyBasicPanel) mainApplet.getPanel();
+		panel.repaint();
+		
 		return true;
 	}
 }
