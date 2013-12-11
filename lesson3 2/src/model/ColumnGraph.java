@@ -1,15 +1,19 @@
 package model;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.Properties;
 
-public class DrawColumn extends DrawBasicGraph {
+import javax.swing.JPanel;
+
+public class ColumnGraph extends DrawBasicGraph implements IGraph{
 
 	Model model;
 
 	Graphics2D g2D;
 
-	public DrawColumn(Model model) {
+	public ColumnGraph(Model model) {
 		super(model);
 		this.model = model;
 	}
@@ -72,5 +76,23 @@ public class DrawColumn extends DrawBasicGraph {
 						-(int) point.yValue);
 			yCount += tickX;
 		}
+	}
+
+	@Override
+	public void setDataSet(IDataSet ds) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void draw(Graphics g, JPanel panel) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setProperties(Properties p) {
+		// TODO Auto-generated method stub
+		
 	}
 }
